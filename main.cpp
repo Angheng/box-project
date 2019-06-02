@@ -1,6 +1,5 @@
 #include "board.h"
 #include <iostream>
-#include <ncurses.h>
 
 using namespace std;
 

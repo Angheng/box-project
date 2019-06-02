@@ -8,6 +8,7 @@ using namespace std;
 /** 3: Destination, 4: OuyBound, 5: Character **/
 /** 10: Destination That completed **/
 
+
 Board::Board() {
     board[MAX_ROW][MAX_COL] = {0};
 }
