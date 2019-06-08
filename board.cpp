@@ -1,12 +1,13 @@
 #include "board.h"
 #include <iostream>
+#include <ncurses.h>
 
 using namespace std;
 
 /** State of Each NUmber **/
 /** 0: Empty Space, 1: Wall, 2: Box **/
 /** 3: Destination, 4: OuyBound, 5: Character **/
-/** 10: Destination That completed **/
+
 
 
 Board::Board() {
@@ -37,24 +38,55 @@ void Board::make_board(int (*arr)[10]) {
 }
 
 void Board::print_board() {
-    cout << "\n======= map =======\n";
+    mvprintw(1, 1, "======= map =======\n");
 
     for (int i = 0; i < MAX_ROW; i ++) {
 
         for (int j = 0; j < MAX_COL; j ++) {
-            if (player.r == i && player.c == j)
-                cout << 5 << " ";
-            else
-                cout << board[i][j] << " ";
+            if (player.r == i && player.c == j) {
+                attron(COLOR_PAIR(2));
+                mvprintw(i + 2, j * 2 + 1, "@@");
+                attroff(COLOR_PAIR(2));
+            }
+            else {
+                if(board[i][j] == 1) {
+                    attron(COLOR_PAIR(3));
+                    mvprintw(i + 2, j * 2 + 1, "%d ", board[i][j]);
+                    attroff(COLOR_PAIR(3));
+                }
+                else if(board[i][j] == 2 || board[i][j] == 9) {
+                    attron(COLOR_PAIR(4));
+                    mvprintw(i + 2, j * 2 + 1, "%d ", board[i][j]);
+                    attroff(COLOR_PAIR(4));
+                }
+                else if(board[i][j] == 3) {
+                    attron(COLOR_PAIR(5));
+                    mvprintw(i + 2, j * 2 + 1, "%d ", board[i][j]);
+                    attroff(COLOR_PAIR(5));
+                }
+                else if(board[i][j] == 4) {
+                    attron(COLOR_PAIR(6));
+                    mvprintw(i + 2, j * 2 + 1, "%d ", board[i][j]);
+                    attroff(COLOR_PAIR(6));
+                } else
+                    mvprintw(i + 2, j * 2 + 1, "  ", board[i][j]);
+            }
         }
 
-        cout << endl;
-
     }
-    cout << "-------------------\n";
-    cout << "Player Moved : " << player_move << " || Box Moved: " << box_move << endl;
+    printw("\n-------------------\n");
+    printw("\n Player Moved : %d || Box Moved : %d\n", player_move, box_move);
 
-    cout << "===================\n";
+    printw("===================\n");
+
+    mvprintw(21, 1, "[white: Player, red: Wall, yello: Box, blue: Destination]");
+    mvprintw(22, 1, "[UP: w, LEFT: a, DOWN: s, RIGHT: d, QUIT: q, RESET: r]");
+
+    attron(COLOR_PAIR(1));
+    border('*', '*', '*', '*', '*', '*', '*', '*');
+    attroff(COLOR_PAIR(1));
+
+    refresh();
 }
 
 void Board::moving(char direction) {
@@ -70,7 +102,7 @@ void Board::moving(char direction) {
                 board[player.r - 1][player.c] = 0;
 
                 if (board[player.r - 2][player.c] == 3) {   // Box Entering the Destination
-                    board[player.r - 2][player.c] = 10;
+                    board[player.r - 2][player.c] = 9;
                     correctBoxs ++;
                 } else {                                    // Default Case
                     board[player.r - 2][player.c] = 2;
@@ -78,11 +110,11 @@ void Board::moving(char direction) {
 
                 box_move ++;
 
-            } else if (board[player.r - 1][player.c] == 10){  // Case of Pushing Box at Destination.
+            } else if (board[player.r - 1][player.c] == 9){  // Case of Pushing Box at Destination.
                 board[player.r - 1][player.c] = 3;
 
                 if (board[player.r - 2][player.c] == 3) {
-                    board[player.r - 2][player.c] = 10;
+                    board[player.r - 2][player.c] = 9;
                 } else {
                     board[player.r - 2][player.c] = 2;
                     correctBoxs --;
@@ -104,7 +136,7 @@ void Board::moving(char direction) {
                 board[player.r + 1][player.c] = 0;
 
                 if (board[player.r + 2][player.c] == 3) {   // Box Entering the Destination
-                    board[player.r + 2][player.c] = 10;
+                    board[player.r + 2][player.c] = 9;
                     correctBoxs ++;
                 } else {                                    // Default Case
                     board[player.r + 2][player.c] = 2;
@@ -112,11 +144,11 @@ void Board::moving(char direction) {
 
                 box_move ++;
 
-            } else if (board[player.r + 1][player.c] == 10){  // Case of Pushing Box at Destination.
+            } else if (board[player.r + 1][player.c] == 9){  // Case of Pushing Box at Destination.
                 board[player.r + 1][player.c] = 3;
 
                 if (board[player.r + 2][player.c] == 3) {
-                    board[player.r + 2][player.c] = 10;
+                    board[player.r + 2][player.c] = 9;
                 } else {
                     board[player.r + 2][player.c] = 2;
                     correctBoxs --;
@@ -138,7 +170,7 @@ void Board::moving(char direction) {
                 board[player.r][player.c -1] = 0;
 
                 if (board[player.r][player.c - 2] == 3) {   // Box Entering the Destination
-                    board[player.r][player.c - 2] = 10;
+                    board[player.r][player.c - 2] = 9;
                     correctBoxs ++;
                 } else {                                    // Default Case
                     board[player.r][player.c - 2] = 2;
@@ -146,11 +178,11 @@ void Board::moving(char direction) {
 
                 box_move ++;
 
-            } else if (board[player.r][player.c - 1] == 10){  // Case of Pushing Box at Destination.
+            } else if (board[player.r][player.c - 1] == 9){  // Case of Pushing Box at Destination.
                 board[player.r][player.c - 1] = 3;
 
                 if (board[player.r][player.c - 2] == 3) {
-                    board[player.r][player.c - 2] = 10;
+                    board[player.r][player.c - 2] = 9;
                 } else {
                     board[player.r][player.c - 2] = 2;
                     correctBoxs --;
@@ -172,7 +204,7 @@ void Board::moving(char direction) {
                 board[player.r][player.c + 1] = 0;
 
                 if (board[player.r][player.c + 2] == 3) {   // Box Entering the Destination
-                    board[player.r][player.c + 2] = 10;
+                    board[player.r][player.c + 2] = 9;
                     correctBoxs ++;
                 } else {                                    // Default Case
                     board[player.r][player.c + 2] = 2;
@@ -180,11 +212,11 @@ void Board::moving(char direction) {
 
                 box_move ++;
 
-            } else if (board[player.r][player.c + 1] == 10){  // Case of Pushing Box at Destination.
+            } else if (board[player.r][player.c + 1] == 9){  // Case of Pushing Box at Destination.
                 board[player.r][player.c + 1] = 3;
 
                 if (board[player.r][player.c + 2] == 3) {
-                    board[player.r][player.c + 2] = 10;
+                    board[player.r][player.c + 2] = 9;
                 } else {
                     board[player.r][player.c + 2] = 2;
                     correctBoxs --;
@@ -204,7 +236,7 @@ bool Board::isPosible(int r_move, int c_move)  {
         return false;
 
 
-    if (board[r_move + player.r][c_move + player.c] == 2 || board[r_move + player.r][c_move + player.c] == 10) {
+    if (board[r_move + player.r][c_move + player.c] == 2 || board[r_move + player.r][c_move + player.c] == 9) {
         if (board[r_move * 2 + player.r][c_move * 2 + player.c] == 0 || board[r_move * 2 + player.r][c_move * 2 + player.c] == 3)
             return true;
     }
